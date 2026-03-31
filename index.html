@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KrediKartlari.net - En Güncel Kredi Kartı Kampanyaları</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <meta name="description" content="Tüm bankaların güncel kredi kartı kampanyaları, taksit fırsatları ve indirimler KrediKartlari.net'te.">
+</head>
+<body>
+    <div class="background-blob blob-1"></div>
+    <div class="background-blob blob-2"></div>
+    
+    <header class="navbar">
+        <div class="container nav-content">
+            <a href="#" class="logo">
+                <span class="logo-icon">💳</span>
+                KrediKartlari<span class="highlight">.net</span>
+            </a>
+            <nav class="nav-links">
+                <a href="#" class="active">Kampanyalar</a>
+                <a href="#">Bankalar</a>
+                <a href="#">Kredi Kartları</a>
+                <a href="#">İletişim</a>
+            </nav>
+            <div class="nav-actions">
+                <button class="btn btn-outline">Giriş Yap</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <div class="hero-badge">✨ Yeni Kampanyalar Eklendi</div>
+            <h1>Avantajı Yakala, <br><span class="highlight-gradient">Harcarken Kazan!</span></h1>
+            <p>Türkiye'nin en güncel kredi kartı kampanyaları tek ekranda. Bankaların sunduğu fırsatları karşılaştırın, bütçenizi en iyi şekilde yönetin.</p>
+            
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Kampanya, marka veya banka ara...">
+                <button class="btn btn-primary" id="searchBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </button>
+            </div>
+        </section>
+
+        <section class="filters">
+            <div class="filter-group" id="categoryFilters">
+                <button class="filter-btn active" data-filter="all">Tümü</button>
+                <button class="filter-btn" data-filter="market">🛒 Market</button>
+                <button class="filter-btn" data-filter="akaryakit">⛽ Akaryakıt</button>
+                <button class="filter-btn" data-filter="giyim">👗 Giyim</button>
+                <button class="filter-btn" data-filter="seyahat">✈️ Seyahat</button>
+                <button class="filter-btn" data-filter="elektronik">💻 Elektronik</button>
+            </div>
+            
+            <div class="filter-group bank-filters" id="bankFilters">
+                <!-- Select for mobile, chips for desktop -->
+                <select id="bankSelect" class="bank-select">
+                    <option value="all">Tüm Bankalar</option>
+                    <option value="garanti">Garanti BBVA</option>
+                    <option value="isbankasi">İş Bankası</option>
+                    <option value="ykb">Yapı Kredi</option>
+                    <option value="akbank">Akbank</option>
+                    <option value="qnb">QNB Finansbank</option>
+                </select>
+            </div>
+        </section>
+
+        <section class="campaigns-grid" id="campaignsGrid">
+            <!-- Cards will be populated dynamically by app.js -->
+        </section>
+        
+        <div class="load-more-container">
+            <button class="btn btn-outline" id="loadMoreBtn">Daha Fazla Göster</button>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container footer-content">
+            <div class="footer-brand">
+                <a href="#" class="logo">
+                     KrediKartlari<span class="highlight">.net</span>
+                </a>
+                <p>En güncel kart fırsatları ve indirimler için bizi takip edin. Tüm hakları saklıdır &copy; 2026</p>
+            </div>
+            <div class="footer-links">
+                <h3>Hızlı Linkler</h3>
+                <ul>
+                    <li><a href="#">Ana Sayfa</a></li>
+                    <li><a href="#">Kampanyalar</a></li>
+                    <li><a href="#">Bankalar</a></li>
+                    <li><a href="#">Hakkımızda</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h3>Yasal</h3>
+                <ul>
+                    <li><a href="#">Kullanım Koşulları</a></li>
+                    <li><a href="#">Gizlilik Politikası</a></li>
+                    <li><a href="#">Çerez Politikası</a></li>
+                    <li><a href="#">İletişim</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
