@@ -4,7 +4,10 @@ import { auth } from "@/auth";
 
 const prisma = new PrismaClient();
 
-export async function POST(req: Request, { params }: { params: { action: string } }) {
+export async function POST(
+  req: Request,
+  { params }: { params: Promise<{ action: string }> }
+) {
   try {
     const session = await auth();
     if (!session || !session.user) {
@@ -18,7 +21,9 @@ export async function POST(req: Request, { params }: { params: { action: string 
       return NextResponse.json({ message: "Kullanıcı bulunamadı." }, { status: 404 });
     }
 
-    if (params.action === "favorite") {
+    const resolvedParams = await params;
+
+    if (resolvedParams.action === "favorite") {
       const existing = await prisma.favorite.findUnique({
         where: { userId_campaignId: { userId: user.id, campaignId } }
       });
@@ -32,21 +37,19 @@ export async function POST(req: Request, { params }: { params: { action: string 
         await prisma.favorite.create({ data: { userId: user.id, campaignId } });
         return NextResponse.json({ message: "Favorilere eklendi.", action: "added" });
       }
-    }
-
-    if (params.action === "comment") {
+    } else if (resolvedParams.action === "comment") {
       if (!text || text.trim() === "") {
         return NextResponse.json({ message: "Yorum boş olamaz." }, { status: 400 });
       }
 
-      const comment = await prisma.comment.create({
-        data: { userId: user.id, campaignId, text }
+      await prisma.comment.create({
+        data: { text, userId: user.id, campaignId }
       });
 
-      return NextResponse.json({ message: "Yorum başarıyla eklendi.", comment });
+      return NextResponse.json({ message: "Yorum eklendi." });
     }
 
-    return NextResponse.json({ message: "Geçersiz eylem." }, { status: 400 });
+    return NextResponse.json({ message: "Geçersiz işlem." }, { status: 400 });
   } catch (error) {
     console.error("Etkileşim API hatası:", error);
     return NextResponse.json({ message: "Sunucu hatası oluştu." }, { status: 500 });

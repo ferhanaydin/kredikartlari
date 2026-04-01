@@ -54,8 +54,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        // @ts-ignore (role özelliği modelden geldiği için ts kuralını geçici esnetiyoruz)
+        // @ts-ignore
         token.role = user.role
+        // @ts-ignore
+        token.brandId = user.brandId
+        // @ts-ignore
+        token.isApproved = user.isApproved
       }
       return token
     },
@@ -63,6 +67,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (token && session.user) {
         // @ts-ignore
         session.user.role = token.role
+        // @ts-ignore
+        session.user.brandId = token.brandId
+        // @ts-ignore
+        session.user.isApproved = token.isApproved
       }
       return session
     }

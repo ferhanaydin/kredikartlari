@@ -3,13 +3,15 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 enum Role {
   USER
   ADMIN
+  EDITOR
+  FIRMA_EDITOR
 }
 
 enum CampaignStatus {
@@ -24,8 +26,13 @@ model User {
   email         String?   @unique
   emailVerified DateTime?
   image         String?
-  password      String?   // Şifre isteğe bağlıdır, çünkü Google ile giriş yapanlarda şifre olmayacak
+  password      String?   
   role          Role      @default(USER)
+  
+  brandId       String?   // Firma/Banka editörü ise hangi markaya ait olduğu
+  brand         Brand?    @relation(fields: [brandId], references: [id])
+  
+  isApproved    Boolean   @default(true) 
   
   accounts      Account[]
   sessions      Session[]
@@ -72,21 +79,68 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-model Bank {
+// Firma/Banka/Marka (e.g., Garanti, BP, Media Markt)
+model Brand {
+  id          String     @id @default(cuid())
+  name        String
+  slug        String     @unique
+  logoUrl     String?
+  isActive    Boolean    @default(true)
+  
+  // Hiyerarşi: Bir firmanın ana sektörü (e.g., Garanti -> Banka, BP -> Akaryakıt)
+  categoryId  String
+  category    Category   @relation(fields: [categoryId], references: [id])
+  
+  creditCards CreditCard[]
+  campaigns   Campaign[] @relation("CampaignBrands")
+  editors     User[]
+  
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+// Kredi Kartı (e.g., Bonus, Wings, Axess)
+model CreditCard {
+  id          String     @id @default(cuid())
+  name        String
+  slug        String     @unique
+  imageUrl    String?
+  isActive    Boolean    @default(true)
+  
+  brandId     String
+  brand       Brand      @relation(fields: [brandId], references: [id])
+  
+  campaigns   Campaign[] @relation("CampaignCards")
+  
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+// Sektör: (Market, Elektronik, Akaryakıt, Banka...)
+model Category {
   id        String     @id @default(cuid())
-  name      String
+  name      String     
   slug      String     @unique
-  logoUrl   String?
-  campaigns Campaign[]
+  icon      String?    
+  isActive  Boolean    @default(true)
+  
+  brands    Brand[]    // Sektöre bağlı markalar
+  campaigns Campaign[] @relation("CampaignCategories")
+  
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 }
 
-model Category {
+// Avantaj: (Puan, Artı Taksit, İndirim...)
+model Avantaj {
   id        String     @id @default(cuid())
-  name      String     // e.g., "🛒 Market"
-  slug      String     @unique
-  campaigns Campaign[]
+  name      String     
+  slug      String     @unique 
+  icon      String?    
+  isActive  Boolean    @default(true)
+  
+  campaigns Campaign[] @relation("CampaignAvantajlar")
+  
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 }
@@ -95,18 +149,20 @@ model Campaign {
   id          String   @id @default(cuid())
   title       String
   description String
+  summary     String?  // Özet
+  keywords    String?  // Virgülle ayrılmış anahtar kelimeler
   imageUrl    String?
   endDate     DateTime
   
-  status      CampaignStatus @default(PENDING) // pending until admin approves
+  status      CampaignStatus @default(PENDING) 
   
-  // Relations
-  bankId      String
-  bank        Bank     @relation(fields: [bankId], references: [id])
-  categoryId  String
-  category    Category @relation(fields: [categoryId], references: [id])
-  
-  authorId    String? // Optional: in case admin creates it without being logged in during migration
+  // Many-to-Many Relations
+  brands      Brand[]      @relation("CampaignBrands")
+  categories  Category[]   @relation("CampaignCategories")
+  creditCards CreditCard[] @relation("CampaignCards")
+  avantajlar  Avantaj[]    @relation("CampaignAvantajlar")
+
+  authorId    String? 
   author      User?   @relation(fields: [authorId], references: [id])
 
   comments    Comment[]
@@ -114,7 +170,7 @@ model Campaign {
 
   // SEO & Migration fields
   slug        String   @unique
-  oldPhpUrl   String?  @unique // To map old ?id=XX links to new slugs for tracking
+  oldPhpUrl   String?  @unique 
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -145,5 +201,5 @@ model Favorite {
 
   createdAt   DateTime @default(now())
 
-  @@unique([userId, campaignId]) // bir kullanıcı bir kampanyayı sadece 1 kere favorileyebilir
+  @@unique([userId, campaignId]) 
 }

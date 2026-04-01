@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
   try {
-    const { name, email, password } = await req.json();
+    const { name, email, password, role, brandId } = await req.json();
 
     if (!name || !email || !password) {
       return NextResponse.json(
@@ -30,13 +30,19 @@ export async function POST(req: Request) {
     // Hash the password
     const hashedPassword = await bcryptjs.hash(password, 10);
 
+    // Firma editörü ise onay false, diğerleri true (ki giriş yapabilsinler)
+    const isApproved = role === "FIRMA_EDITOR" ? false : true;
+
     // Create user in DB
     const user = await prisma.user.create({
       data: {
         name,
         email,
         password: hashedPassword,
-        // İlk kayıt olan kişiye ADMIN rolü verilmez, default: USER'dir.
+        role: role || "USER",
+        // @ts-ignore
+        brandId: brandId || null,
+        isApproved
       },
     });
 

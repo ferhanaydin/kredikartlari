@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -9,24 +9,52 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isFirmaEditor, setIsFirmaEditor] = useState(false);
+  const [selectedBrandId, setSelectedBrandId] = useState("");
+  const [brands, setBrands] = useState<{id: string, name: string}[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Bu form, API tarafında yazacağımız /api/register route'una POST atacak
+  useEffect(() => {
+    if (isFirmaEditor) {
+      fetch("/api/brands")
+        .then(res => res.json())
+        .then(data => {
+          setBrands(data);
+          if (data.length > 0) setSelectedBrandId(data[0].id);
+        })
+        .catch(err => console.error("Markalar yüklenemedi", err));
+    }
+  }, [isFirmaEditor]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
+    if (isFirmaEditor && !selectedBrandId) {
+      setError("Lütfen temsil ettiğiniz firmayı seçin.");
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ 
+          name, 
+          email, 
+          password,
+          role: isFirmaEditor ? "FIRMA_EDITOR" : "USER",
+          brandId: isFirmaEditor ? selectedBrandId : null
+        }),
       });
 
       if (res.ok) {
-        router.push("/login");
+        // Eğer firma editörü ise onay beklemesi gerektiğini belirten bir parametre ile yönlendirelim
+        const target = isFirmaEditor ? "/login?pending=true" : "/login";
+        router.push(target);
       } else {
         const data = await res.json();
         setError(data.message || "Kayıt işlemi başarısız.");
@@ -93,6 +121,39 @@ export default function RegisterPage() {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
+
+          <div className="pt-2">
+            <label className="flex items-center gap-3 cursor-pointer group">
+              <input 
+                type="checkbox" 
+                className="w-5 h-5 rounded border-white/10 bg-white/5 text-[#7c3aed] focus:ring-[#7c3aed]"
+                checked={isFirmaEditor}
+                onChange={(e) => setIsFirmaEditor(e.target.checked)}
+              />
+              <span className="text-sm text-slate-300 group-hover:text-white transition-colors">Firma Temsilcisiyim (Editör)</span>
+            </label>
+          </div>
+
+          {isFirmaEditor && (
+            <div className="space-y-1 animate-fadeIn">
+              <label className="block text-sm font-medium text-slate-300 mb-1">Temsil Ettiğiniz Firma / Marka</label>
+              <select
+                required
+                className="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#7c3aed] transition-all"
+                value={selectedBrandId}
+                onChange={(e) => setSelectedBrandId(e.target.value)}
+              >
+                <option value="" disabled className="text-black">Firma Seçin...</option>
+                {brands.map(brand => (
+                  <option key={brand.id} value={brand.id} className="text-black">{brand.name}</option>
+                ))}
+              </select>
+              <p className="text-[12px] text-yellow-400/80 mt-1 italic">
+                * Firma editörü hesapları admin onayından sonra aktifleşir.
+              </p>
+            </div>
+          )}
+
           <button
             type="submit"
             disabled={loading}
