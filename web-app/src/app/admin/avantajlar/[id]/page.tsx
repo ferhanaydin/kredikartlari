@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import IconPicker from "./IconPicker";
+import IconPicker from "@/components/admin/IconPicker";
 import SlugGenerator from "@/components/admin/SlugGenerator";
 
 const prisma = new PrismaClient();
@@ -14,16 +14,19 @@ async function saveAvantaj(formData: FormData) {
   const icon = (formData.get("icon") as string) || null;
 
   if (id) {
-    await prisma.avantaj.update({ where: { id }, data: { name, slug, icon } });
+    await prisma.avantaj.update({ 
+      where: { id }, 
+      data: { name, slug, icon } 
+    });
   } else {
-    await prisma.avantaj.create({ data: { name, slug, icon, isActive: true } });
+    await prisma.avantaj.create({ 
+      data: { name, slug, icon } 
+    });
   }
   revalidatePath("/admin/avantajlar");
   revalidatePath("/");
   redirect("/admin/avantajlar");
 }
-
-const COMMON_ICONS = ["💳", "💰", "🎁", "✈️", "🛒", "⛽", "🍕", "🎯", "💸", "🏆", "📱", "🏥", "🎬", "🚗", "🏨"];
 
 export default async function AvantajFormPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

@@ -13,11 +13,16 @@ async function saveCard(formData: FormData) {
   const slug = formData.get("slug") as string;
   const imageUrl = (formData.get("imageUrl") as string) || null;
   const brandId = formData.get("brandId") as string;
+  const seoTitle = formData.get("seoTitle") as string | null;
+  const seoDescription = formData.get("seoDescription") as string | null;
+  const keywords = formData.get("keywords") as string | null;
+
+  const data = { name, slug, imageUrl, brandId, seoTitle, seoDescription, keywords };
 
   if (id) {
-    await prisma.creditCard.update({ where: { id }, data: { name, slug, imageUrl, brandId } });
+    await prisma.creditCard.update({ where: { id }, data });
   } else {
-    await prisma.creditCard.create({ data: { name, slug, imageUrl, brandId } });
+    await prisma.creditCard.create({ data });
   }
   revalidatePath("/admin/kartlar");
   revalidatePath("/");
@@ -54,28 +59,14 @@ export default async function CardFormPage({ params }: { params: Promise<{ id: s
           {/* Card Image Upload */}
           <div>
             <label className={labelClass}>Kart Görseli</label>
-            <div className="flex items-start gap-4">
-              {/* Kart animasyonlu önizleme */}
-              <div className="flex-shrink-0">
-                <div className="w-28 h-[72px] rounded-xl bg-gradient-to-br from-indigo-500 via-violet-500 to-sky-500 shadow-lg relative overflow-hidden">
-                  <div className="absolute top-2 left-2 w-5 h-3.5 rounded bg-yellow-300/30 border border-yellow-200/40"></div>
-                  <div className="absolute bottom-2 right-2 w-5 h-5 rounded-full bg-white/10"></div>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-white/60 text-[9px] font-black text-center px-1">{card?.name || "Kart Adı"}</span>
-                  </div>
-                </div>
-                <p className="text-slate-400 text-[10px] text-center mt-1 font-semibold">Önizleme</p>
-              </div>
-              <div className="flex-1">
-                <ImageUpload
-                  name="imageUrl"
-                  currentUrl={card?.imageUrl}
-                  folder="cards"
-                  shape="card"
-                  label="Kart Resmi Yükle"
-                />
-              </div>
-            </div>
+            <ImageUpload
+              name="imageUrl"
+              currentUrl={card?.imageUrl}
+              folder="cards"
+              shape="card"
+              label="Kart Resmi Yükle"
+            />
+            <p className="text-slate-400 text-[10px] mt-2">Kartın ön yüzünün net bir fotoğrafını yükleyin.</p>
           </div>
 
           <hr className="border-slate-100" />
@@ -99,6 +90,30 @@ export default async function CardFormPage({ params }: { params: Promise<{ id: s
                 <option key={brand.id} value={brand.id}>{brand.name}</option>
               ))}
             </select>
+          </div>
+
+          <div className="border-t border-slate-100 pt-6 mt-6">
+            <h3 className="text-sm font-black text-slate-800 mb-4 flex items-center gap-2">
+              🔍 SEO Ayarları
+              <span className="text-[10px] bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full uppercase tracking-tighter">Opsiyonel</span>
+            </h3>
+            
+            <div className="space-y-4 px-6 pb-6">
+              <div>
+                <label className={labelClass}>SEO Başlığı (Title)</label>
+                <input type="text" name="seoTitle" defaultValue={card?.seoTitle || ""} placeholder="Garanti Bonus Kredi Kartı Kampanyaları" className={inputClass} />
+              </div>
+
+              <div>
+                <label className={labelClass}>SEO Açıklaması (Meta Description)</label>
+                <textarea name="seoDescription" defaultValue={card?.seoDescription || ""} rows={3} placeholder="Garanti Bonus kart taksit, puan ve özel indirim fırsatları..." className={inputClass + " resize-none"} />
+              </div>
+
+              <div>
+                <label className={labelClass}>Anahtar Kelimeler (Keywords)</label>
+                <input type="text" name="keywords" defaultValue={card?.keywords || ""} placeholder="bonus, kredi kartı, puan, taksit" className={inputClass} />
+              </div>
+            </div>
           </div>
 
           <div className="flex gap-3 pt-2">

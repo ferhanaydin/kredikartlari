@@ -12,12 +12,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug, cardSlug } = await params;
   const card = await prisma.creditCard.findFirst({
     where: { slug: cardSlug, brand: { slug: slug }, isActive: true },
-    select: { name: true, brand: { select: { name: true } } }
+    select: { name: true, seoTitle: true, seoDescription: true, keywords: true, brand: { select: { name: true } } }
   });
   if (!card) return { title: "Kart Bulunamadı" };
   return {
-    title: `${card.name} (${card.brand.name}) Kampanyaları | KrediKartlari.net`,
-    description: `${card.brand.name} ${card.name} kredi kartı sahiplerine özel avantajlar, kampanyalar ve taksit fırsatları.`,
+    title: card.seoTitle || `${card.name} (${card.brand.name}) Kampanyaları | KrediKartlari.net`,
+    description: card.seoDescription || `${card.brand.name} ${card.name} kredi kartı sahiplerine özel avantajlar, kampanyalar ve taksit fırsatları.`,
+    keywords: card.keywords || `${card.name}, ${card.brand.name}, kampanya, taksit, puan`,
   };
 }
 

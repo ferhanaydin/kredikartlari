@@ -9,11 +9,15 @@ const prisma = new PrismaClient();
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const brand = await prisma.brand.findUnique({ where: { slug }, select: { name: true } });
+  const brand = await prisma.brand.findUnique({ 
+    where: { slug }, 
+    select: { name: true, seoTitle: true, seoDescription: true, keywords: true } 
+  });
   if (!brand) return { title: "Marka Bulunamadı" };
   return {
-    title: `${brand.name} Kampanyaları | KrediKartlari.net`,
-    description: `${brand.name} tarafından sunulan tüm kredi kartı kampanyaları ve fırsatlar.`,
+    title: brand.seoTitle || `${brand.name} Kampanyaları | KrediKartlari.net`,
+    description: brand.seoDescription || `${brand.name} tarafından sunulan tüm kredi kartı kampanyaları ve fırsatlar.`,
+    keywords: brand.keywords || `${brand.name}, kampanya, taksit, puan`,
   };
 }
 

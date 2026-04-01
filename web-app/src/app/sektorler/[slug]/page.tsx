@@ -11,8 +11,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const sector = await prisma.category.findUnique({ where: { slug } });
   if (!sector) return { title: "Sektör Bulunamadı" };
   return {
-    title: `${sector.name} Kampanyaları | KrediKartlari.net`,
-    description: `${sector.name} kategorisindeki tüm kredi kartı kampanyaları.`,
+    title: sector.seoTitle || `${sector.name} Kampanyaları | KrediKartlari.net`,
+    description: sector.seoDescription || `${sector.name} kategorisindeki tüm kredi kartı kampanyaları.`,
+    keywords: sector.keywords || `${sector.name}, kampanya, kredi kartı, indirim`,
   };
 }
 

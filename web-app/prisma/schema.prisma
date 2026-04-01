@@ -95,8 +95,16 @@ model Brand {
   campaigns   Campaign[] @relation("CampaignBrands")
   editors     User[]
   
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  // SEO Fields
+  seoTitle       String?
+  seoDescription String?
+  keywords       String?
+
+  // Migration Fields
+  oldPhpId       Int?       @unique
 }
 
 // Kredi Kartı (e.g., Bonus, Wings, Axess)
@@ -112,8 +120,16 @@ model CreditCard {
   
   campaigns   Campaign[] @relation("CampaignCards")
   
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  // SEO Fields
+  seoTitle       String?
+  seoDescription String?
+  keywords       String?
+
+  // Migration Fields
+  oldPhpId       Int?       @unique
 }
 
 // Sektör: (Market, Elektronik, Akaryakıt, Banka...)
@@ -127,8 +143,16 @@ model Category {
   brands    Brand[]    // Sektöre bağlı markalar
   campaigns Campaign[] @relation("CampaignCategories")
   
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  // SEO Fields
+  seoTitle       String?
+  seoDescription String?
+  keywords       String?
+
+  // Migration Fields
+  oldPhpId       Int?       @unique
 }
 
 // Avantaj: (Puan, Artı Taksit, İndirim...)
@@ -171,6 +195,7 @@ model Campaign {
   // SEO & Migration fields
   slug        String   @unique
   oldPhpUrl   String?  @unique 
+  oldPhpId    Int?     @unique
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

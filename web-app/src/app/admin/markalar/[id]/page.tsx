@@ -13,11 +13,16 @@ async function saveBrand(formData: FormData) {
   const slug = formData.get("slug") as string;
   const logoUrl = (formData.get("logoUrl") as string) || null;
   const categoryId = formData.get("categoryId") as string;
+  const seoTitle = formData.get("seoTitle") as string | null;
+  const seoDescription = formData.get("seoDescription") as string | null;
+  const keywords = formData.get("keywords") as string | null;
+
+  const data = { name, slug, logoUrl, categoryId, seoTitle, seoDescription, keywords };
 
   if (id) {
-    await prisma.brand.update({ where: { id }, data: { name, slug, logoUrl, categoryId } });
+    await prisma.brand.update({ where: { id }, data });
   } else {
-    await prisma.brand.create({ data: { name, slug, logoUrl, categoryId } });
+    await prisma.brand.create({ data });
   }
   revalidatePath("/admin/markalar");
   revalidatePath("/");
@@ -88,6 +93,30 @@ export default async function BrandFormPage({ params }: { params: Promise<{ id: 
                 <option key={cat.id} value={cat.id}>{cat.icon} {cat.name}</option>
               ))}
             </select>
+          </div>
+
+          <div className="border-t border-slate-100 pt-6 mt-6">
+            <h3 className="text-sm font-black text-slate-800 mb-4 flex items-center gap-2">
+              🔍 SEO Ayarları
+              <span className="text-[10px] bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full uppercase tracking-tighter">Opsiyonel</span>
+            </h3>
+            
+            <div className="space-y-4 px-6 pb-6">
+              <div>
+                <label className={labelClass}>SEO Başlığı (Title)</label>
+                <input type="text" name="seoTitle" defaultValue={brand?.seoTitle || ""} placeholder="En İyi Garanti BBVA Kampanyaları | Kredi Kartları" className={inputClass} />
+              </div>
+
+              <div>
+                <label className={labelClass}>SEO Açıklaması (Meta Description)</label>
+                <textarea name="seoDescription" defaultValue={brand?.seoDescription || ""} rows={3} placeholder="Garanti BBVA Bonus kart kampanyaları ve özel banka fırsatları..." className={inputClass + " resize-none"} />
+              </div>
+
+              <div>
+                <label className={labelClass}>Anahtar Kelimeler (Keywords)</label>
+                <input type="text" name="keywords" defaultValue={brand?.keywords || ""} placeholder="garanti, bonus, kampanya, indirim" className={inputClass} />
+              </div>
+            </div>
           </div>
 
           <div className="flex gap-3 pt-2">
